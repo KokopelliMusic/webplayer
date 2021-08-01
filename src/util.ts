@@ -40,3 +40,7 @@ export const getQueryParams = () => {
 export const redirect = (to: string) => {
   window.location.replace(to)
 }
+
+export const getRandomNumber = (lower: number, upper: number) => {
+  return Math.floor(Math.random() * (upper - lower + 1) + lower)
+}

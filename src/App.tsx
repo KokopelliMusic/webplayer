@@ -4,20 +4,28 @@ import {
   Switch,
   Route
 } from 'react-router-dom'
-import Connect from './Connect';
-import Player from './Player';
+import Connect from './pages/Connect';
+import Player from './pages/Player';
+import SocketContext from './socket/SocketContext';
 
-const App: React.FC = () =>
-<Router>
-  <Switch>
-    <Route path="/player">
-      <Player />
-    </Route>
-    <Route>
-      <Connect />
-    </Route>
-  </Switch>
-</Router>
+interface AppProps {
+}
+
+const App: React.FC<AppProps> = (props) => {
+
+  return <Router>
+    <Switch>
+      <Route path="/player">
+        <Player />
+      </Route>
+      <Route>
+        <Connect />
+      </Route>
+    </Switch>
+  </Router>
+
+}
+
 
 
 export default App;

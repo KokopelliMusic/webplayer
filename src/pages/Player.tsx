@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { checkPlayerCode, getPlayerCode, redirect } from './util'
+import { checkPlayerCode, getPlayerCode, redirect } from '../util'
 
 const Player: React.FC = () => {
   const code: string = getPlayerCode()
