@@ -1,23 +1,29 @@
 import { useEffect, useState } from "react";
+import { watchSessionCode } from "../data/session";
 import settings from '../settings'
+import { redirect } from "../util";
 
 const Connect = () => {
 
   const [code, setCode] = useState('')
  
   useEffect(() => {
-    const fun = async () => {
-      await fetch(settings.makeUrl('session/new'))
-        .then(resp => resp.json())
-        .then(resp => setCode(resp.code))
-        .catch(err => {
-          console.error(err)
-          alert(`Something went wrong, try refreshing.`)
-        })
-    }
+    fetch(settings.makeUrl('session/new'))
+      .then(resp => resp.json())
+      .then(resp => {
+        setCode(resp.code)
+        watchSessionCode(resp.code, codeClaimed)
+      })
+      .catch(err => {
+        console.error(err)
+        alert(`Something went wrong, try refreshing.`)
+      })
 
-    fun()
   }, [])
+
+  const codeClaimed = () => {
+    redirect('/player')
+  }
 
   return <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4">
   <div className="max-w-lg min-w-lg w-full space-y-8">
@@ -35,7 +41,7 @@ const Connect = () => {
       </p>
     </div>
     <div>
-      <h1 className="text-center text-9xl font-extrabold text-gray-900">
+      <h1 className="text-center text-9xl font-extrabold text-gray-900 uppercase">
         { code.split('').join(' ') }
       </h1>
     </div>

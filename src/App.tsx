@@ -6,7 +6,6 @@ import {
 } from 'react-router-dom'
 import Connect from './pages/Connect';
 import Player from './pages/Player';
-import SocketContext from './socket/SocketContext';
 
 interface AppProps {
 }
