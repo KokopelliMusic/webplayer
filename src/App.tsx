@@ -1,4 +1,5 @@
-import React from 'react';
+import EventEmitter from 'events';
+import React, { useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Switch,
@@ -11,6 +12,10 @@ interface AppProps {
 }
 
 const App: React.FC<AppProps> = (props) => {
+
+  useEffect(() => {
+    if (!window.playerEvents) window.playerEvents = new EventEmitter()
+  }, [])
 
   return <Router>
     <Switch>

@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { firebase, FirebaseContext } from './data/firebase';
-import { SessionContext } from './data/session';
+import { SessionContext, SessionContextProvider } from './data/session';
 
 // const socket = io('http://localhost:8080/socket.io', {
   // transports: ['websocket']
@@ -13,9 +13,9 @@ import { SessionContext } from './data/session';
 ReactDOM.render(
   <React.StrictMode>
     <FirebaseContext.Provider value={firebase}>
-      {/* <SessionContext> */}
+      <SessionContextProvider>
         <App />
-      {/* </SessionContext> */}
+      </SessionContextProvider>
     </FirebaseContext.Provider>
   </React.StrictMode>,
   document.getElementById('root')

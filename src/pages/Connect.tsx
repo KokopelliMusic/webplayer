@@ -1,11 +1,14 @@
+import { useContext } from "react";
 import { useEffect, useState } from "react";
-import { watchSessionCode } from "../data/session";
+import { useHistory } from "react-router-dom";
+import { Session, SessionContext, watchSessionCode } from "../data/session";
 import settings from '../settings'
-import { redirect } from "../util";
 
 const Connect = () => {
 
   const [code, setCode] = useState('')
+  const sessionContext = useContext(SessionContext)
+  const history = useHistory()
  
   useEffect(() => {
     fetch(settings.makeUrl('session/new'))
@@ -21,8 +24,9 @@ const Connect = () => {
 
   }, [])
 
-  const codeClaimed = () => {
-    redirect('/player')
+  const codeClaimed = (session: Session) => {
+    sessionContext.setSession!(session)
+    history.push('/player')
   }
 
   return <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4">
