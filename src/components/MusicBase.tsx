@@ -20,7 +20,12 @@ const MusicBase = (props: MusicBaseProps) => {
 
   useEffect(() => {
     // Dynamically change font size for the title, depending on how long the title is
-    props.title.length > 30 ? setTitleSize('text-7xl') : setTitleSize('text-8xl')
+    let size = 'text-8xl'
+    if (props.title.length > 80) size = 'text-6xl'
+    else if (props.title.length > 30) size = 'text-7xl'
+
+    setTitleSize(size)
+
   }, [props.title.length])
 
   useEffect(() => {
