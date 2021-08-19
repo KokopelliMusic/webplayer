@@ -26,7 +26,9 @@ export class SpotifyWebPlayback extends React.Component {
   }
 
   getAccessToken() {
-    return sessionStorage.getItem('spotifyAccess')
+    const store = sessionStorage.getItem('spotifyAccess')
+    if (store === null) return null
+    else return JSON.parse(store).token
   }
 
   getDeviceID() {
@@ -50,13 +52,17 @@ export class SpotifyWebPlayback extends React.Component {
       const player = new Spotify.Player({
         name: 'Epic Web Player',
         getOAuthToken: async (cb: any) => {
-          // TODO wtf
-            getSpotifyToken(this.session.uid!).then(async () => {
-              await refreshSpotifyToken(this.session.uid!)
-                .then(code => {
-                  cb(code)
-                })
-            }) 
+          // first check locally
+          const spotifyAccess = this.getAccessToken()
+
+          if (spotifyAccess !== null) {
+            cb(spotifyAccess)
+          } else {
+            // else just ask the database
+            await refreshSpotifyToken(this.session.uid!).then(code => {
+              cb(code)
+            })
+          }
         }
       });
       

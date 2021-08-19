@@ -7,6 +7,7 @@ import LoadingPlayer from '../events/LoadingPlayer';
 import MusicBase from '../components/MusicBase';
 import { EventEmitter } from 'events'
 import { SpotifyWebPlayback } from '../events/Spotify';
+import { refreshSpotifyToken } from '../data/spotify';
 
 
 export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData
@@ -84,7 +85,31 @@ const Player: React.FC = () => {
 
     setTimeout(async () => {
       setFinishedLoading(true)
-    }, 2000)
+    }, 5000)
+
+    setTimeout(async () => {
+
+      const spotifyStore = sessionStorage.getItem('spotifyAccess')
+      if (spotifyStore !== null) {
+        const access = JSON.parse(spotifyStore)
+
+        // if token is 30 minutes old, just refresh it
+        if (new Date().getTime() + 30 * 60 * 1000 > new Date(access.time).getTime()) {
+          const sessionStore = sessionStorage.getItem('session')
+          
+          if (sessionStore) {
+            const session = JSON.parse(sessionStore)
+
+            await refreshSpotifyToken(session.uid).then(code => {
+              sessionStorage.setItem('spotifyAccess', JSON.stringify({
+                token: code,
+                time: new Date().getTime()
+              }))
+            })
+          }
+        }
+      }
+    }, 60 * 1000)
 
   }, [])
 

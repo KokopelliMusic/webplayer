@@ -1,11 +1,11 @@
 import { getDatabase, ref, get } from "@firebase/database"
+import { set } from "firebase/database"
 import settings from '../settings'
 
 export const refreshSpotifyToken = async (uid: string): Promise<string> => {
-  const path = `users/${uid}/spotify/refresh`
-  const spotifyRef = ref(getDatabase(), path)
-
-  const refresh = await get(spotifyRef).then(snap => snap.val())
+  const path = `users/${uid}/spotify`
+  const refresh = await get(ref(getDatabase(), path + '/refresh')).then(snap => snap.val())
+  const accessRef = ref(getDatabase(), path + '/access')
 
   return await fetch(settings.refreshSpotify, {
     method: 'POST',
@@ -22,7 +22,13 @@ export const refreshSpotifyToken = async (uid: string): Promise<string> => {
       console.error('Spotify refresh failed :(', data)
       return
     }
-    sessionStorage.setItem('spotifyAccess', data.access_token)
+
+    set(accessRef, data.access_token)
+
+    sessionStorage.setItem('spotifyAccess', JSON.stringify({
+      token: data.access_token,
+      time: new Date().getTime()
+    }))
     return data.access_token
   })
 }
@@ -34,7 +40,10 @@ export const getSpotifyToken = (uid: string): Promise<string> => {
   return get(spotifyRef)
     .then(snap => snap.val())
     .then(snap => {
-      sessionStorage.setItem('spotifyAccess', snap)
+      sessionStorage.setItem('spotifyAccess', JSON.stringify({
+        token: snap,
+        time: new Date().getTime()
+      }))
       return snap
     })
 }

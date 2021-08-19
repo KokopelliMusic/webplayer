@@ -45,7 +45,7 @@ const Connect = () => {
       </p>
     </div>
     <div>
-      <h1 className="text-center text-9xl font-extrabold text-gray-900 uppercase">
+      <h1 className="text-center text-9xl font-black text-gray-900 uppercase">
         { code.split('').join(' ') }
       </h1>
     </div>
