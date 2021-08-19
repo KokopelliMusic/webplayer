@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import Events from '../data/events';
-import { MP3EventData, selectNextEvent, SessionContext, SpotifyEventData, YouTubeEventData } from '../data/session';
+import { MP3EventData, selectNextEvent, SessionContext, setCurrentlyPlaying, SpotifyEventData, YouTubeEventData } from '../data/session';
 import AdtRad from '../events/AdtRad';
 import LoadingPlayer from '../events/LoadingPlayer';
 import MusicBase from '../components/MusicBase';
@@ -42,17 +42,26 @@ const Player: React.FC = () => {
   const [finishedLoading, setFinishedLoading] = useState(false)
 
   const next = async () => {
-    const e = await selectNextEvent(session.code!, history)
 
-    console.log(e)
+    let code = session.code!
 
-    // @ts-expect-error
-    e.code = session.code!
+    if (!code) {
+      const session = sessionStorage.getItem('session')!
+
+      if (session === null) {
+        history.push('/')
+      }
+
+      code = JSON.parse(session).code
+    }
+
+    const e = await selectNextEvent(code, history)
+
+    e.data.code = code
 
     setEvent(e.type)
     setEventData(e.data)
-
-    console.log(e.type)
+    setCurrentlyPlaying(code, e.data)
 
     if (e.type === Events.Spotify) {
       window.playerEvents.emit('play', e.data)

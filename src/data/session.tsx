@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue } from 'firebase/database'
+import { getDatabase, ref, onValue, set } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { createContext } from 'react'
 import Events, { GameEvents } from './events'
@@ -61,22 +61,15 @@ export const watchSessionCode = (code: string, callback: (session: Session) => v
 
 }
 
+export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData) => {
+  const playingRef = ref(getDatabase(), 'currently-playing/' + sessionCode.toUpperCase())
+
+  set(playingRef, song)
+}
+
 export const selectNextEvent = async (sessionCode: string, history: any): Promise<NextEvent> => {
 
-  let code = sessionCode
-
-  if (!code) {
-    const session = sessionStorage.getItem('session')!
-
-    if (session === null) {
-      history.push('/')
-    }
-
-    code = JSON.parse(session).code
-  }
-
-
-  return await fetch(settings.makeUrl(`event/next?code=${code}`))
+  return await fetch(settings.makeUrl(`event/next?code=${sessionCode}`))
     .then(resp => resp.json())
     .then(resp => {
       return {

@@ -50,6 +50,7 @@ export class SpotifyWebPlayback extends React.Component {
       const player = new Spotify.Player({
         name: 'Epic Web Player',
         getOAuthToken: async (cb: any) => {
+          // TODO wtf
             getSpotifyToken(this.session.uid!).then(async () => {
               await refreshSpotifyToken(this.session.uid!)
                 .then(code => {
