@@ -13,7 +13,8 @@ export class SpotifyWebPlayback extends React.Component {
   spotifyApi: SpotifyApi.SpotifyWebApiJs
 
   state = {
-    paused: true
+    paused: true,
+    spotify: undefined
   }
 
   constructor(props: any) {
@@ -21,14 +22,20 @@ export class SpotifyWebPlayback extends React.Component {
     this.device = '';
     this.session = JSON.parse(sessionStorage.getItem('session')!)
     this.spotifyApi = new SpotifyApi();
-    this.spotifyApi.setAccessToken(this.getAccessToken());
     this.getAccessToken = this.getAccessToken.bind(this);
   }
 
-  getAccessToken() {
+
+  async getAccessToken() {
     const store = sessionStorage.getItem('spotifyAccess')
-    if (store === null) return null
-    else return JSON.parse(store).token
+    let token;
+    if (store === null) {
+      token = await refreshSpotifyToken(this.session.uid!)
+    } else {
+      token = JSON.parse(store).token
+    }
+    this.spotifyApi.setAccessToken(token)
+    return token
   }
 
   getDeviceID() {
@@ -36,33 +43,38 @@ export class SpotifyWebPlayback extends React.Component {
   }
 
   playSong(song: string) {
+    // this._play(song, this.state.spotify)
     console.log(`Attempting to play on devive ${this.device}`);
-    this.spotifyApi.play({ device_id: this.device, uris: ['spotify:track:' + song] })
+    this.spotifyApi.play({ device_id: this.device, uris: ['spotify:track:' + song] }, (error) => {
+      if (error) {
+        console.error(error)
+        setTimeout(() => {
+          this.spotifyApi.play({ device_id: this.device, uris: ['spotify:track:' + song] })
+        }, 5000)
+      }
+    })
   }
 
   endOfSong() {
     window.playerEvents.emit('finished');
   }
 
+  // TODO queue alles
 
-  componentDidMount() {
+  async componentDidMount() {
+
+    await this.getAccessToken();
 
     window.onSpotifyWebPlaybackSDKReady = () => {
       const Spotify = window.Spotify;
       const player = new Spotify.Player({
-        name: 'Epic Web Player',
+        name: 'Kokopelli',
         getOAuthToken: async (cb: any) => {
           // first check locally
           const spotifyAccess = this.getAccessToken()
-
-          if (spotifyAccess !== null) {
-            cb(spotifyAccess)
-          } else {
-            // else just ask the database
-            await refreshSpotifyToken(this.session.uid!).then(code => {
-              cb(code)
-            })
-          }
+          cb(spotifyAccess)
+          console.log('Spotify wants a new token')
+          console.log('Giving back this code', JSON.parse(sessionStorage.getItem('spotifyAccess')!))
         }
       });
       
@@ -82,9 +94,17 @@ export class SpotifyWebPlayback extends React.Component {
       })
 
       // Error handling
-      player.addListener('initialization_error', ({ message }: any) => { console.error(message); });
-      player.addListener('authentication_error', ({ message }: any) => { console.error(message); });
-      player.addListener('account_error', ({ message }: any) => { console.error(message); });
+      player.addListener('initialization_error', ({ message }: any) => console.error(message))
+
+      // Emitted when the Spotify.Player fails to instantiate a valid Spotify connection from the access token provided to getOAuthToken.
+      player.addListener('authentication_error', ({ message }: any) => { 
+        console.error('Failed to authenticate', message)
+      })
+
+      // This triggers when the user does not have Spotify premium
+      player.addListener('account_error', ({ message }: any) => console.error(message))
+
+      // This triggers when loading and/or playing back a track fails
       player.addListener('playback_error', ({ message }: any) => { 
         console.error(message);
       });
@@ -119,6 +139,7 @@ export class SpotifyWebPlayback extends React.Component {
       // Connect to the player!
       player.connect().then((success: boolean) => {
         window.playerEvents.emit('ready', success)
+        this.setState({ spotify: player })
       })
     }
   }

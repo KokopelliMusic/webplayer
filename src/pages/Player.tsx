@@ -87,20 +87,26 @@ const Player: React.FC = () => {
       setFinishedLoading(true)
     }, 5000)
 
-    setTimeout(async () => {
+    setInterval(async () => {
 
       const spotifyStore = sessionStorage.getItem('spotifyAccess')
+      console.log('Checking spotify')
       if (spotifyStore !== null) {
         const access = JSON.parse(spotifyStore)
+        console.log(access)
 
         // if token is 30 minutes old, just refresh it
-        if (new Date().getTime() + 30 * 60 * 1000 > new Date(access.time).getTime()) {
+        if (new Date(new Date(access.time).getTime() + 30 * 60 * 1000) < new Date()) {
           const sessionStore = sessionStorage.getItem('session')
+          console.log('Access token more than 30 minutes old')
           
           if (sessionStore) {
+            console.log(sessionStore)
             const session = JSON.parse(sessionStore)
 
             await refreshSpotifyToken(session.uid).then(code => {
+              console.log('New code: ', code)
+              sessionStorage.removeItem('spotifyAccess')
               sessionStorage.setItem('spotifyAccess', JSON.stringify({
                 token: code,
                 time: new Date().getTime()
