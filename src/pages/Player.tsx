@@ -10,7 +10,7 @@ import { SpotifyWebPlayback } from '../events/Spotify';
 import { refreshSpotifyToken } from '../data/spotify';
 
 
-export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData
+export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData | {}
 
 export type EventProps = {
   finished: () => void
@@ -60,13 +60,18 @@ const Player: React.FC = () => {
 
     e.data.code = code
 
-    setEvent(e.type)
-    setEventData(e.data)
-    setCurrentlyPlaying(code, e.data)
+    // setEvent(e.type)
+    // setEventData(e.data)
+    // setCurrentlyPlaying(code, e.data)
 
-    if (e.type === Events.Spotify) {
+    setEvent(Events.AdtRad)
+    setEventData({})
+    setCurrentlyPlaying(code, Events.AdtRad)
+
+    if (e.type === 'spotify') {
       window.playerEvents.emit('play', e.data)
     }
+
   }
 
   useEffect(() => {
@@ -150,19 +155,6 @@ const Player: React.FC = () => {
       : <LoadingPlayer />
     }
     <SpotifyWebPlayback />
-    {/* {!session.uid && !session.code ? <div /> :
-      <SpotifyPlayer 
-        uid={session.uid!} 
-        code={session.code!} 
-        finished={finished}
-        setReady={setSpotifyReady}
-        setApi={setSpotifyApi}
-        setDevice={setSpotifyDevice}
-        emitter={spotifyEmitter}
-        /> }
-    {spotifyReady && finishedLoading
-      ? (playPressed ? getEventComponent(event) : <PressPlay onClick={play} />) 
-      : <LoadingPlayer />} */}
   </div>
   
 }

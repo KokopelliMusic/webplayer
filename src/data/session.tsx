@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue, set } from 'firebase/database'
+import { getDatabase, ref, onValue, set, get } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { createContext } from 'react'
 import Events, { GameEvents } from './events'
@@ -61,10 +61,23 @@ export const watchSessionCode = (code: string, callback: (session: Session) => v
 
 }
 
-export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData) => {
+export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData | string) => {
   const playingRef = ref(getDatabase(), 'currently-playing/' + sessionCode.toUpperCase())
 
-  set(playingRef, song)
+  let toSet
+
+  if (typeof song === 'string') {
+    toSet = {
+      code: sessionCode,
+      type: 'event',
+      title: song,
+      artist: 'event'
+    }
+  } else {
+    toSet = song
+  }
+
+  set(playingRef, toSet)
 }
 
 export const selectNextEvent = async (sessionCode: string, history: any): Promise<NextEvent> => {
@@ -77,6 +90,30 @@ export const selectNextEvent = async (sessionCode: string, history: any): Promis
         data: resp.data
       }
     })
+}
+
+export const getPeople = async (sessionCode: string): Promise<string[]> => {
+  const sessionRef = ref(getDatabase(), 'sessions/' + sessionCode.toUpperCase() + '/weights')
+  let people: string[] = []
+
+  get(sessionRef)
+    .then(snap => snap.val())
+    .then(val => {
+      // Now we have an object of uid: weight
+      // only need to remove the event user
+      delete val['event']
+
+      for (const [user, _] of Object.entries(val)) {
+        const userRef = ref(getDatabase(), 'users/' + user + '/user/username')
+        
+        // get the username and put in in the array
+        get(userRef)
+          .then(snap => snap.val())
+          .then(people.push)
+      }
+    })
+
+  return people
 }
 
 export const translateBackendEvent = (code: string): Events => {

@@ -1,10 +1,10 @@
 enum Events {
-  Loading,
-  Spotify,
-  MP3,
-  AdtRad,
-  PlaylistEmpty,
-  YouTube,
+  Loading = 'loading',
+  Spotify = 'spotify',
+  MP3 = 'mp3',
+  AdtRad = 'Adtrad',
+  PlaylistEmpty = 'nosongs',
+  YouTube = 'youtube',
 }
 
 export const GameEvents = [Events.AdtRad]

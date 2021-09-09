@@ -43,8 +43,6 @@ export class SpotifyWebPlayback extends React.Component {
   }
 
   playSong(song: string) {
-    // this._play(song, this.state.spotify)
-    console.log(`Attempting to play on devive ${this.device}`);
     this.spotifyApi.play({ device_id: this.device, uris: ['spotify:track:' + song] }, (error) => {
       if (error) {
         console.error(error)
@@ -73,8 +71,6 @@ export class SpotifyWebPlayback extends React.Component {
           // first check locally
           const spotifyAccess = this.getAccessToken()
           cb(spotifyAccess)
-          console.log('Spotify wants a new token')
-          console.log('Giving back this code', JSON.parse(sessionStorage.getItem('spotifyAccess')!))
         }
       });
       
