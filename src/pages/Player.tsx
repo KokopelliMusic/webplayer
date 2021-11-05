@@ -8,6 +8,7 @@ import MusicBase from '../components/MusicBase';
 import { EventEmitter } from 'events'
 import { SpotifyWebPlayback } from '../events/Spotify';
 import { refreshSpotifyToken } from '../data/spotify';
+import YouTube from '../events/YouTube';
 
 
 export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData
@@ -130,7 +131,7 @@ const Player: React.FC = () => {
       case Events.MP3:
         return <div> MP3 TODO</div>
       case Events.YouTube:
-        return <div>YouTube TODO</div>
+        return <YouTube {...(eventData as YouTubeEventData)} />
       
       case Events.AdtRad:
         return <AdtRad finished={finished}/>
@@ -150,19 +151,7 @@ const Player: React.FC = () => {
       : <LoadingPlayer />
     }
     <SpotifyWebPlayback />
-    {/* {!session.uid && !session.code ? <div /> :
-      <SpotifyPlayer 
-        uid={session.uid!} 
-        code={session.code!} 
-        finished={finished}
-        setReady={setSpotifyReady}
-        setApi={setSpotifyApi}
-        setDevice={setSpotifyDevice}
-        emitter={spotifyEmitter}
-        /> }
-    {spotifyReady && finishedLoading
-      ? (playPressed ? getEventComponent(event) : <PressPlay onClick={play} />) 
-      : <LoadingPlayer />} */}
+    {/* <YouTube {...({ code: 'ABCD', addedBy: 'Niels', title: `Manowar - Warriors of the world`} as YouTubeEventData) }/> */}
   </div>
   
 }
