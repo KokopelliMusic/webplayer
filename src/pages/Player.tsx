@@ -1,13 +1,14 @@
 import { useEffect, useState, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import Events from '../data/events';
-import { MP3EventData, selectNextEvent, SessionContext, setCurrentlyPlaying, SpotifyEventData, YouTubeEventData } from '../data/session';
+import { MP3EventData, selectNextEvent, SessionContext, setCurrentlyPlaying, SpotifyEventData, SpotifyExtras, YouTubeEventData } from '../data/session';
 import AdtRad from '../events/AdtRad';
 import LoadingPlayer from '../events/LoadingPlayer';
 import MusicBase from '../components/MusicBase';
 import { EventEmitter } from 'events'
 import { SpotifyWebPlayback } from '../events/Spotify';
 import { refreshSpotifyToken } from '../data/spotify';
+import YouTube from '../events/YouTube';
 
 
 export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData
@@ -60,8 +61,17 @@ const Player: React.FC = () => {
 
     e.data.code = code
 
-    setEvent(e.type)
+    console.log('OldEvent', eventData)
+    console.log('NewEvent', e.data)
+
+    // als dit werkt word ik boos
+    if (eventData && eventData.songType !== 'spotify') {
+      setSpotifyReady(false)
+      setTimeout(() => setSpotifyReady(true), 1000)
+    }
+
     setEventData(e.data)
+    setEvent(e.type)
     setCurrentlyPlaying(code, e.data)
 
     if (e.type === Events.Spotify) {
@@ -130,7 +140,7 @@ const Player: React.FC = () => {
       case Events.MP3:
         return <div> MP3 TODO</div>
       case Events.YouTube:
-        return <div>YouTube TODO</div>
+        return <YouTube {...(eventData as YouTubeEventData)} finished={finished} />
       
       case Events.AdtRad:
         return <AdtRad finished={finished}/>
@@ -150,19 +160,6 @@ const Player: React.FC = () => {
       : <LoadingPlayer />
     }
     <SpotifyWebPlayback />
-    {/* {!session.uid && !session.code ? <div /> :
-      <SpotifyPlayer 
-        uid={session.uid!} 
-        code={session.code!} 
-        finished={finished}
-        setReady={setSpotifyReady}
-        setApi={setSpotifyApi}
-        setDevice={setSpotifyDevice}
-        emitter={spotifyEmitter}
-        /> }
-    {spotifyReady && finishedLoading
-      ? (playPressed ? getEventComponent(event) : <PressPlay onClick={play} />) 
-      : <LoadingPlayer />} */}
   </div>
   
 }

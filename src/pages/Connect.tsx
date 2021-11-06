@@ -16,6 +16,7 @@ const Connect = () => {
       .then(resp => {
         setCode(resp.code)
         watchSessionCode(resp.code, codeClaimed)
+        return resp;
       })
       .catch(err => {
         console.error(err)

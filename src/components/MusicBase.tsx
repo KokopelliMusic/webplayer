@@ -1,16 +1,14 @@
 import { useContext, useRef } from "react"
 import { useEffect, useState } from "react"
-import { SessionContext } from "../data/session"
+import { MP3Extras, SessionContext, SpotifyExtras } from "../data/session"
 import ColorThief from 'colorthief'
 import './MusicBase.css'
 
 interface MusicBaseProps {
-  artist: string
   title: string
-  cover: string
-  length: number
   code: string
   addedBy: string
+  song: SpotifyExtras | MP3Extras | undefined
 }
 const MusicBase = (props: MusicBaseProps) => {
 
@@ -37,23 +35,26 @@ const MusicBase = (props: MusicBaseProps) => {
   }, [props.title.length])
 
   useEffect(() => {
-    if (timeInterval) {
-      clearInterval(timeInterval)
+    if (props.song && props.song.length >= 0) {
+      console.log('MusicBase.props', props)
+      if (timeInterval) {
+        clearInterval(timeInterval)
+      }
+      
+      setTimePlayed(0)
+      setTimeInterval(setInterval(() => {
+        setTimePlayed(timePlayed => timePlayed + 1000)
+      }, 1000))
     }
-    
-    setTimePlayed(0)
-    setTimeInterval(setInterval(() => {
-      setTimePlayed(timePlayed => timePlayed + 1000)
-    }, 1000))
-
 
     return () => {
       clearInterval(timeInterval!)
     }
-  }, [props.length])
+  }, [props.song])
 
   const calcTimeLeftStyle = () => {
-    return `${Math.floor((timePlayed / props.length) * 100)}%`
+    // @ts-expect-error
+    return `${Math.floor((timePlayed / props.song.length) * 100)}%`
   }
 
   const selectTextColor = (r: number, g: number, b: number) => {
@@ -91,6 +92,10 @@ const MusicBase = (props: MusicBaseProps) => {
     return '#' + component(r) + component(g) + component(b)
   }
 
+  if (!props.song) {
+    return <div></div>
+  }
+
   return <div 
     className="h-screen font-player" 
     style={{ 
@@ -115,7 +120,7 @@ const MusicBase = (props: MusicBaseProps) => {
             <div>
               <img 
                 className="rounded-3xl shadow-2xl-white"     
-                src={props.cover} 
+                src={props.song!.cover} 
                 ref={albumCoverRef}
                 id="img-test"
                 crossOrigin="anonymous"
@@ -139,7 +144,7 @@ const MusicBase = (props: MusicBaseProps) => {
 
                   
                 <div className="w-16 text-xl text-right">
-                  {formatTime(props.length)}
+                  {formatTime(props.song.length)}
                 </div>
 
               </div>
@@ -159,7 +164,7 @@ const MusicBase = (props: MusicBaseProps) => {
           </div>
 
           <div className="pt-3 pl-1.5 text-5xl">
-            {props.artist}
+            {props.song.artist}
           </div>
           <div className="pt-3 pl-2 text-2xl">
             Added by <span className="italic">{props.addedBy}</span> 
