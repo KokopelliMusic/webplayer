@@ -21,27 +21,33 @@ interface NextEvent {
 
 type MusicEventData = {
   code: string
-  artist: string
   title: string
-  cover: string
-  length: number
-  type: string
+  songType: string
   uid: string
   addedBy: string
   playlistId: string
+  platformId: string
+  song: SpotifyExtras | MP3Extras | undefined
 }
 
-export type SpotifyEventData = MusicEventData & {
-  spotifyId: string
+export type SpotifyExtras = {
+  artist: string
+  cover: string
+  length: number
 }
 
-export type YouTubeEventData = MusicEventData & {
-  youtubeId: string
-}
-
-export type MP3EventData = MusicEventData & {
+export type MP3Extras = {
   src: string
+  cover: string
+  length: number
+  artist: string
 }
+
+export type SpotifyEventData = MusicEventData & {}
+
+export type YouTubeEventData = MusicEventData & {}
+
+export type MP3EventData = MusicEventData & {}
 
 
 export const watchSessionCode = (code: string, callback: (session: Session) => void): void => {
@@ -72,6 +78,7 @@ export const selectNextEvent = async (sessionCode: string, history: any): Promis
   return await fetch(settings.makeUrl(`event/next?code=${sessionCode}`))
     .then(resp => resp.json())
     .then(resp => {
+      console.log(resp)
       return {
         type: translateBackendEvent(resp.type),
         data: resp.data

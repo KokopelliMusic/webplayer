@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import YouTubeIFrame, { Options } from 'react-youtube'
 import { YouTubeEventData } from '../data/session'
 
+export type YoutubePlayerProps = YouTubeEventData & {
+  finished: () => Promise<void>
+}
 
-const YouTube = (props: YouTubeEventData) => {
+const YouTube = (props: YoutubePlayerProps) => {
 
   // const [title, setTitle] = useState<string>('Outsiders, Django Wagner - Kali (Outsiders Remix)')
   const titleSize = 2.0
@@ -39,12 +42,17 @@ const YouTube = (props: YouTubeEventData) => {
     <div className="text-2xl text-white flex justify-between pl-4 pr-4">
       <h1>{props.title}</h1>
       <div className="">
+        <button className="pr-4" onClick={props.finished}>next...</button>
         <span className="pr-4">{props.addedBy}</span>
         <span>{props.code}</span>
       </div>
     </div>
     <div className="w-screen flex flex-center justify-center">
-      <YouTubeIFrame videoId="K70nC0FbxiU" onReady={onReady} opts={opts}/>
+      <YouTubeIFrame 
+        videoId={props.platformId} 
+        onReady={onReady} 
+        onEnd={props.finished}
+        opts={opts}/>
     </div>
   </div>
 }

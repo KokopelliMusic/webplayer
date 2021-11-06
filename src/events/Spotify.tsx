@@ -82,8 +82,8 @@ export class SpotifyWebPlayback extends React.Component {
 
       window.playerEvents.on('play', data => {
         console.log(data)
-        if (data.spotifyId) {
-          this.playSong(data.spotifyId);
+        if (data.platformId) {
+          this.playSong(data.platformId);
         } else {
           player.pause();
         }
