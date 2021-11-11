@@ -3,15 +3,16 @@ import ParticleBackground, { ParticleOptions } from "./ParticleBackground"
 
 type EventBaseProps = {
   children?: ReactNode
-  particles: ParticleOptions[]
+  // particles: ParticleOptions[]
 }
 
 const EventBase = (props: EventBaseProps) => {
 
-  return <div>
-    <ParticleBackground particles={props.particles}>
+  return <div className="bg-indigo-700 h-screen w-screen flex justify-center items-center">
+    { props.children }
+    {/* <ParticleBackground particles={props.particles}>
       { props.children }
-    </ParticleBackground>
+    </ParticleBackground> */}
   </div>
 }
 

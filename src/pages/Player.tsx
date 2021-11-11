@@ -8,6 +8,7 @@ import MusicBase from '../components/MusicBase';
 import { EventEmitter } from 'events'
 import { SpotifyWebPlayback } from '../events/Spotify';
 import { refreshSpotifyToken } from '../data/spotify';
+import settings from '../settings';
 
 
 export type EventContextType = SpotifyEventData | MP3EventData | YouTubeEventData | {}
@@ -60,13 +61,13 @@ const Player: React.FC = () => {
 
     e.data.code = code
 
-    // setEvent(e.type)
-    // setEventData(e.data)
-    // setCurrentlyPlaying(code, e.data)
+    setEvent(e.type)
+    setEventData(e.data)
+    setCurrentlyPlaying(code, e.data)
 
-    setEvent(Events.AdtRad)
-    setEventData({})
-    setCurrentlyPlaying(code, Events.AdtRad)
+    // setEvent(Events.AdtRad)
+    // setEventData({})
+    // setCurrentlyPlaying(code, Events.AdtRad)
 
     if (e.type === 'spotify') {
       window.playerEvents.emit('play', e.data)
@@ -90,7 +91,8 @@ const Player: React.FC = () => {
 
     setTimeout(async () => {
       setFinishedLoading(true)
-    }, 5000)
+      // lmao
+    }, settings.debug ? 500: 5000)
 
     setInterval(async () => {
 

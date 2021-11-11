@@ -93,27 +93,21 @@ export const selectNextEvent = async (sessionCode: string, history: any): Promis
 }
 
 export const getPeople = async (sessionCode: string): Promise<string[]> => {
-  const sessionRef = ref(getDatabase(), 'sessions/' + sessionCode.toUpperCase() + '/weights')
-  let people: string[] = []
+  const peopleRef = ref(getDatabase(), 'sessions/' + sessionCode.toUpperCase() + '/users')
 
-  get(sessionRef)
+  return await get(peopleRef)
     .then(snap => snap.val())
     .then(val => {
-      // Now we have an object of uid: weight
-      // only need to remove the event user
-      delete val['event']
+      let people: string[] = []
 
-      for (const [user, _] of Object.entries(val)) {
-        const userRef = ref(getDatabase(), 'users/' + user + '/user/username')
-        
-        // get the username and put in in the array
-        get(userRef)
-          .then(snap => snap.val())
-          .then(people.push)
+      if (val !== null) {
+        for (const [_, username] of Object.entries(val)) {
+          people.push(username as string);
+        }
       }
-    })
 
-  return people
+      return people
+    })
 }
 
 export const translateBackendEvent = (code: string): Events => {

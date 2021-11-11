@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import Particles, { IOptions, RecursivePartial } from "react-tsparticles";
 
 type ParticlesProps = {
@@ -18,7 +18,6 @@ export type ParticleOptions = {
 const ParticleBackground = (props: ParticlesProps) => {
 
   const particlesInit = (main: any) => {
-    console.log(main)
   }
 
   const particlesLoaded = () => {
@@ -28,13 +27,13 @@ const ParticleBackground = (props: ParticlesProps) => {
   const options: RecursivePartial<IOptions> = {
     particles: {
       number: {
-        value: props.number || 20 
+        value: props.number || 5 
       },
       lineLinked: {
         enable: false
       },
       move: {
-        speed: props.speed || 6,
+        speed: props.speed || 5,
         out_mode: 'out',
         enable: true
       },
@@ -72,13 +71,13 @@ const ParticleBackground = (props: ParticlesProps) => {
         { props.children }
       </div>
     </div>
-    <Particles
+    {/* <Particles
       className="z-0 h-screen w-screen absolute"
       id="tsparticles"
       init={particlesInit}
       loaded={particlesLoaded}
       options={options}
-    />
+    /> */}
 
   </div>
 }
