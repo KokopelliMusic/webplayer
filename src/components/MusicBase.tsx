@@ -1,14 +1,14 @@
-import { useContext } from "react"
+import { useContext, useRef } from "react"
 import { useEffect, useState } from "react"
-import { SessionContext } from "../data/session"
+import { MP3Extras, SessionContext, SpotifyExtras } from "../data/session"
+import ColorThief from 'colorthief'
+import './MusicBase.css'
 
 interface MusicBaseProps {
-  artist: string
   title: string
-  cover: string
-  length: number
   code: string
   addedBy: string
+  song: SpotifyExtras | MP3Extras | undefined
 }
 const MusicBase = (props: MusicBaseProps) => {
 
@@ -17,6 +17,12 @@ const MusicBase = (props: MusicBaseProps) => {
   const [titleSize, setTitleSize] = useState('text-8xl')
   const [timePlayed, setTimePlayed] = useState(0)
   const [timeInterval, setTimeInterval] = useState<NodeJS.Timeout>()
+  const [backgroundColor, setBackgroundColor] = useState<string>('#312e81')
+  const [textColor, setTextColor] = useState<string>('#000')
+
+  const albumCoverRef = useRef<HTMLImageElement>(null)
+
+  const colorThief: ColorThief = new ColorThief()
 
   useEffect(() => {
     // Dynamically change font size for the title, depending on how long the title is
@@ -29,26 +35,76 @@ const MusicBase = (props: MusicBaseProps) => {
   }, [props.title.length])
 
   useEffect(() => {
-    if (timeInterval) {
-      clearInterval(timeInterval)
+    if (props.song && props.song.length >= 0) {
+      console.log('MusicBase.props', props)
+      if (timeInterval) {
+        clearInterval(timeInterval)
+      }
+      
+      setTimePlayed(0)
+      setTimeInterval(setInterval(() => {
+        setTimePlayed(timePlayed => timePlayed + 1000)
+      }, 1000))
     }
-    
-    setTimePlayed(0)
-    setTimeInterval(setInterval(() => {
-      setTimePlayed(timePlayed => timePlayed + 1000)
-    }, 1000))
-
 
     return () => {
       clearInterval(timeInterval!)
     }
-  }, [props.length])
+  }, [props.song])
 
   const calcTimeLeftStyle = () => {
-    return `${Math.floor((timePlayed / props.length) * 100)}%`
+    // @ts-expect-error
+    return `${Math.floor((timePlayed / props.song.length) * 100)}%`
   }
 
-  return <div className="bg-indigo-900 h-screen font-player">
+  const selectTextColor = (r: number, g: number, b: number) => {
+    const yiq = ((r*299) + (g*587) + (b*114)) / 1000;
+    
+    if (yiq >= 128) {
+      setTextColor('#000')
+    } else {
+      setTextColor('#FFF')
+    }
+  }
+
+  const selectBackgroundColor = () => {
+    // const img = albumCoverRef.current
+    const img = document.getElementById('img-test') as HTMLImageElement
+    if (!img?.src) {
+      console.error('stuk', albumCoverRef.current)
+      return '#312e81'
+    }
+    
+    const color = colorThief.getColor(img)
+    const hex = rgbToHex(color[0], color[1], color[2])
+  
+    console.log(hex)
+    selectTextColor(color[0], color[1], color[2])
+    setBackgroundColor(hex)
+  }
+
+  const rgbToHex = (r: number, g: number, b: number): string => {
+    const component = (c: number): string => {
+      let hex = c.toString(16)
+      return hex.length === 1 ? "0" + hex : hex
+    }
+
+    return '#' + component(r) + component(g) + component(b)
+  }
+
+  if (!props.song) {
+    return <div></div>
+  }
+
+  return <div 
+    className="h-screen font-player" 
+    style={{ 
+      backgroundColor, 
+      color: textColor,
+      transition: 'all .5s ease',
+      WebkitTransition: 'all .5s ease',
+      MozTransition: 'all .5s ease'
+    }}>
     <div className="grid grid-cols-5">
 
       <div className="col-span-3">
@@ -62,11 +118,18 @@ const MusicBase = (props: MusicBaseProps) => {
 
           <div className="row-span-4 flex flex-col justify-center items-center">
             <div>
-              <img className="rounded-3xl shadow-2xl-white" src={props.cover} alt="cover" />
+              <img 
+                className="rounded-3xl shadow-2xl-white"     
+                src={props.song!.cover} 
+                ref={albumCoverRef}
+                id="img-test"
+                crossOrigin="anonymous"
+                onLoad={selectBackgroundColor}
+                alt="cover" />
             
-              <div className="text-white flex pt-6">
+              <div className="flex pt-6">
               
-                <div className="w-16 text-white text-xl">
+                <div className="w-16 text-xl">
                   {formatTime(timePlayed)}
                 </div>
                   
@@ -74,14 +137,14 @@ const MusicBase = (props: MusicBaseProps) => {
                   <div className="pt-3">
                     <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-red-200">
                       <div style={{ width: calcTimeLeftStyle() }} 
-                      className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500" />
+                      className="shadow-none flex flex-col text-center whitespace-nowrap justify-center bg-red-500" />
                     </div>
                   </div>
                 </div>
 
                   
-                <div className="w-16 text-white text-xl text-right">
-                  {formatTime(props.length)}
+                <div className="w-16 text-xl text-right">
+                  {formatTime(props.song.length)}
                 </div>
 
               </div>
@@ -96,18 +159,18 @@ const MusicBase = (props: MusicBaseProps) => {
 
 
         <div className="row-span-3 pt-20">
-          <div className={`text-white ${titleSize}`}>
+          <div className={`${titleSize}`}>
             {props.title}
           </div>
 
-          <div className="pt-3 pl-1.5 text-5xl text-red-500">
-            {props.artist}
+          <div className="pt-3 pl-1.5 text-5xl">
+            {props.song.artist}
           </div>
-          <div className="text-white pt-3 pl-2 text-2xl">
-            Added by <span className="text-red-500">{props.addedBy}</span> 
+          <div className="pt-3 pl-2 text-2xl">
+            Added by <span className="italic">{props.addedBy}</span> 
           </div>
-          <div className="text-white pt-4 pl-2 text-2xl">
-            Code <span className="text-red-500">{sessionContext.code}</span>
+          <div className="pt-4 pl-2 text-2xl">
+            Code <span className="underline">{sessionContext.code}</span>
           </div>
         </div>
       </div>

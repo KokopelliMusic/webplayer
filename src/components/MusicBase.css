@@ -1,0 +1,19 @@
+.bg-anim {
+    background-color: #312e81;
+    animation-duration: 3s;
+    animation-name: transition-bg-color;
+    animation-iteration-count: 3;
+    animation-direction: alternate;
+}
+
+
+@keyframes transition-bg-color {
+    0% {
+        left: 0px;
+        top: 0px;
+    }
+    75% {
+        left: 0px;
+        top: 150px;
+    }
+}
