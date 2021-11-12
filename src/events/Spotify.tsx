@@ -43,6 +43,7 @@ export class SpotifyWebPlayback extends React.Component {
   }
 
   playSong(song: string) {
+    console.log('Attemping to play song: ', song)
     this.spotifyApi.play({ device_id: this.device, uris: ['spotify:track:' + song] }, (error) => {
       if (error) {
         console.error(error)

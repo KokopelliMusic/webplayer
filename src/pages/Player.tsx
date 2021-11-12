@@ -26,7 +26,7 @@ const Player: React.FC = () => {
   }
 
   const play = async () => {
-    await next()
+    await next(true)
       .then(() => setPlayPressed(true))
   }
 
@@ -39,12 +39,13 @@ const Player: React.FC = () => {
 
   // Component State
   const [event, setEvent] = useState<Events>(Events.Loading)
+  // const [eventComponent, setEventComponent] = useState<React.ReactElement>(<LoadingPlayer />)
   const [eventData, setEventData] = useState<EventContextType>()
   const [spotifyReady, setSpotifyReady] = useState(false)
   const [playPressed, setPlayPressed] = useState(false)
   const [finishedLoading, setFinishedLoading] = useState(false)
 
-  const next = async () => {
+  const next = async (first?: boolean) => {
 
     let code = session.code!
 
@@ -58,20 +59,22 @@ const Player: React.FC = () => {
       code = JSON.parse(session).code
     }
 
-    const e = await selectNextEvent(code, history)
+    const e = await selectNextEvent(code, history, !!first)
 
     e.data.code = code
 
     console.log('OldEvent', eventData)
-    console.log('NewEvent', e.data)
+    console.log('NewEvent', e)
 
     // als dit werkt word ik boos
-    if (eventData && eventData.songType !== 'spotify') {
+    // @ts-ignore
+    if (e && e.type !== 'spotify') {
       setSpotifyReady(false)
       setTimeout(() => setSpotifyReady(true), 1000)
     }
 
     setEventData(e.data)
+    // setEventComponent(getEventComponent(e.type, e.data))
     setEvent(e.type)
     setCurrentlyPlaying(code, e.data)
 
@@ -142,6 +145,7 @@ const Player: React.FC = () => {
         return <LoadingPlayer />
       case Events.PlaylistEmpty:
         return <div>Playlist is empty lol</div>
+
       case Events.Spotify:
         return spotifyReady ? <MusicBase {...(eventData as SpotifyEventData)} /> : <LoadingPlayer />
       case Events.MP3:

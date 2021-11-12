@@ -10,7 +10,7 @@ import './EventStyles.css'
 import LoadingPlayer from "./LoadingPlayer"
 import { selectRandomEventSong } from "./eventMusic"
 
-const WAIT_TIME = 20.000 // 20 sec
+const WAIT_TIME = 20_000 // 20 sec
 
 const AdtRad = (props: EventProps) => {
 
@@ -45,7 +45,7 @@ const AdtRad = (props: EventProps) => {
       })
 
     window.playerEvents.emit('play', {
-      spotifyId: selectRandomEventSong()
+      platformId: selectRandomEventSong()
     })
 
     // setData([

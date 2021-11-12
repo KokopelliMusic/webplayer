@@ -70,13 +70,15 @@ export const watchSessionCode = (code: string, callback: (session: Session) => v
 export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData | string) => {
   const playingRef = ref(getDatabase(), 'currently-playing/' + sessionCode.toUpperCase())
 
+  console.log(`Set currently playing for code ${sessionCode}`, song)
+
   let toSet
 
-  if (typeof song === 'string') {
+  // @ts-expect-error
+  if (song.type && song.type === 'event') {
     toSet = {
       code: sessionCode,
-      type: 'event',
-      title: song,
+      songType: 'event',
       artist: 'event'
     }
   } else {
@@ -86,9 +88,11 @@ export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData 
   set(playingRef, toSet)
 }
 
-export const selectNextEvent = async (sessionCode: string, history: any): Promise<NextEvent> => {
+export const selectNextEvent = async (sessionCode: string, history: any, first: boolean): Promise<NextEvent> => {
 
-  return await fetch(settings.makeUrl(`event/next?code=${sessionCode}`))
+  console.log('first', first)
+
+  return await fetch(settings.makeUrl(`event/next?code=${sessionCode}&firstTime=${first}`))
     .then(resp => resp.json())
     .then(resp => {
       console.log(resp)

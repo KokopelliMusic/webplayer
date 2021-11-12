@@ -25,10 +25,14 @@ const MusicBase = (props: MusicBaseProps) => {
   const colorThief: ColorThief = new ColorThief()
 
   useEffect(() => {
+    console.log('MusicBase props:', props)
+  }, [])
+
+  useEffect(() => {
     // Dynamically change font size for the title, depending on how long the title is
     let size = 'text-8xl'
+    if (props.title.length > 30) size = 'text-7xl'
     if (props.title.length > 80) size = 'text-5xl'
-    else if (props.title.length > 30) size = 'text-7xl'
 
     setTitleSize(size)
 
@@ -92,7 +96,7 @@ const MusicBase = (props: MusicBaseProps) => {
     return '#' + component(r) + component(g) + component(b)
   }
 
-  if (!props.song) {
+  if (!props || !props.song) {
     return <div></div>
   }
 
