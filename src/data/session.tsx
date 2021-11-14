@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue, set } from 'firebase/database'
+import { getDatabase, ref, onValue, set, get } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { createContext } from 'react'
 import Events, { GameEvents } from './events'
@@ -67,15 +67,32 @@ export const watchSessionCode = (code: string, callback: (session: Session) => v
 
 }
 
-export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData) => {
+export const setCurrentlyPlaying = (sessionCode: string, song: SpotifyEventData | YouTubeEventData | MP3EventData | string) => {
   const playingRef = ref(getDatabase(), 'currently-playing/' + sessionCode.toUpperCase())
 
-  set(playingRef, song)
+  console.log(`Set currently playing for code ${sessionCode}`, song)
+
+  let toSet
+
+  // @ts-expect-error
+  if (song.type && song.type === 'event') {
+    toSet = {
+      code: sessionCode,
+      songType: 'event',
+      artist: 'event'
+    }
+  } else {
+    toSet = song
+  }
+
+  set(playingRef, toSet)
 }
 
-export const selectNextEvent = async (sessionCode: string, history: any): Promise<NextEvent> => {
+export const selectNextEvent = async (sessionCode: string, history: any, first: boolean): Promise<NextEvent> => {
 
-  return await fetch(settings.makeUrl(`event/next?code=${sessionCode}`))
+  console.log('first', first)
+
+  return await fetch(settings.makeUrl(`event/next?code=${sessionCode}&firstTime=${first}`))
     .then(resp => resp.json())
     .then(resp => {
       console.log(resp)
@@ -83,6 +100,24 @@ export const selectNextEvent = async (sessionCode: string, history: any): Promis
         type: translateBackendEvent(resp.type),
         data: resp.data
       }
+    })
+}
+
+export const getPeople = async (sessionCode: string): Promise<string[]> => {
+  const peopleRef = ref(getDatabase(), 'sessions/' + sessionCode.toUpperCase() + '/users')
+
+  return await get(peopleRef)
+    .then(snap => snap.val())
+    .then(val => {
+      let people: string[] = []
+
+      if (val !== null) {
+        for (const [_, username] of Object.entries(val)) {
+          people.push(username as string);
+        }
+      }
+
+      return people
     })
 }
 

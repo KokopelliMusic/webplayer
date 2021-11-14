@@ -6,5 +6,6 @@ declare global {
     spotifyPlayer: any
     Spotify: any
     onSpotifyWebPlaybackSDKReady: () => void
+    drawPointer: (() => void) | null
   }
 }

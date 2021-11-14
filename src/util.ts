@@ -12,6 +12,9 @@ export const getQueryParams = () => {
   return new URLSearchParams(window.location.search)
 }
 
+/**
+ * Generates a random number between min (inclusive) and max (inclusive)
+ */
 export const getRandomNumber = (lower: number, upper: number) => {
   return Math.floor(Math.random() * (upper - lower + 1) + lower)
 }
